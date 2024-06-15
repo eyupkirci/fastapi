@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FastAPI Response</title>
+  </head>
+  <body>
+    <h1>Item Information</h1>
+    <div id="item-info">
+      <p>Item Name: {{ item.name }}</p>
+      <p>Item ID: {{ item_id }}</p>
+      <p>Is Offer: {{ item.is_offer }}</p>
+      <p>Message: {{ message }}</p>
+    </div>
+    <script src="/static/main.js"></script>
+    <script>
+      const itemData = {
+        name: "{{ item.name }}",
+        itemId: "{{ item_id }}",
+        isOffer: "{{ item.is_offer }}",
+        message: "{{ message }}",
+      };
+
+      console.log("Item Data:", itemData);
+    </script>
+  </body>
+</html>
