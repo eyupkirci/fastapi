@@ -1,7 +1,7 @@
 from typing import Union
 from enum import Enum
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 
 from fastapi.responses import HTMLResponse
@@ -9,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from typing_extensions import Annotated
+
+from uuid import UUID, uuid4
 
 import json
 
@@ -23,10 +25,50 @@ class Item(BaseModel):
     price: float
     is_offer: Union[bool, None] = None
 
+class Task(BaseModel):
+    id:Union[UUID, None]=None
+    title: str
+    description:str
+    completed: bool = False
+
+# task mock database
+tasks=[]
+
+
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
+
+# Task Route
+@app.get('/tasks/', response_model=list[Task] )
+async def read_tasks():
+    return tasks
+
+@app.post('/tasks/', response_model=Task )
+async def add_task(task:Task)->Task:
+    task.id=uuid4()
+    tasks.append(task)
+    return task
+
+@app.get('/tasks/{task_id}', response_model=Task)
+async def read_task(task_id:UUID):
+    for task in tasks:
+        if task.id==task_id:
+            return task       
+    raise HTTPException(status_code=404, detail='No task found')
+
+@app.put('/tasks/{task_id}', response_model=Task)
+async def read_task(task_id:UUID, task_apdate:Task):
+    for index, task in enumerate(tasks):
+        if task.id==task_id:
+            updated_task = task.copy(update=task_apdate.model_dump(exclude_unset=True))
+            tasks[index]=updated_task
+            return updated_task       
+    raise HTTPException(status_code=404, detail='No task found')
+
+
+# Items Route
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Union[str, None] = None)->dict:
     return {"item_id": item_id, "q": q}
