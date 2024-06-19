@@ -88,21 +88,6 @@ def read_item(item_id: int, q1: Union[str, None] = None, q2: Union[str, None] = 
     return {"item_id": item_id, "query1": q1, "query2": q2, }
 
 
-@app.put("/items/{item_id}/update")
-async def update_item(item_id: Annotated[int, Path(title="The ID of the item to get")], q: Annotated[str | None, Query(
-    title="Query string",
-    description="Query string for the items to search in the database that have a good match",
-    # deprecated=True,
-    max_length=50, min_length=5)] | None = None):
-    for item in items:
-        if item.id==item_id:
-            return item
-
-    if q:
-        result.update({"q": q})
-    return result
-
-
 @app.get("/items/{item_id}/page", response_class=HTMLResponse)
 async def read_index(request: Request, item_id: int, item: Item, q: str | None = None):
     requestBody = await request.body()
