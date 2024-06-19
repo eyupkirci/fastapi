@@ -1,7 +1,7 @@
 from typing import Union
 from enum import Enum
 
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Query, Path
 from pydantic import BaseModel
 
 from fastapi.responses import HTMLResponse
@@ -21,9 +21,11 @@ app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
 class Item(BaseModel):
+    id:Union[int, None]=None
     name: str = "product"
     price: float
     is_offer: Union[bool, None] = None
+    q: Union[str, None] = None
 
 class Task(BaseModel):
     id:Union[UUID, None]=None
@@ -31,8 +33,11 @@ class Task(BaseModel):
     description:str
     completed: bool = False
 
-# task mock database
+# task mock db
 tasks=[]
+
+#item mock db
+items=[]
 
 
 @app.get("/")
@@ -81,6 +86,22 @@ def update_item(item_id: int, item: Annotated[Item, 'It is an Item class instanc
 @app.get("/items/{item_id}/new")
 def read_item(item_id: int, q1: Union[str, None] = None, q2: Union[str, None] = None,)->dict:
     return {"item_id": item_id, "query1": q1, "query2": q2, }
+
+
+@app.put("/items/{item_id}/update")
+async def update_item(item_id: Annotated[int, Path(title="The ID of the item to get")], q: Annotated[str | None, Query(
+    title="Query string",
+    description="Query string for the items to search in the database that have a good match",
+    # deprecated=True,
+    max_length=50, min_length=5)] | None = None):
+    for item in items:
+        if item.id==item_id:
+            return item
+
+    if q:
+        result.update({"q": q})
+    return result
+
 
 @app.get("/items/{item_id}/page", response_class=HTMLResponse)
 async def read_index(request: Request, item_id: int, item: Item, q: str | None = None):
