@@ -72,6 +72,13 @@ async def read_task(task_id:UUID, task_apdate:Task):
             return updated_task       
     raise HTTPException(status_code=404, detail='No task found')
 
+@app.delete('/tasks/{task_id}', response_model=Task)
+async def delete_task(task_id:UUID):
+    for index, task in enumerate(tasks):
+        if task.id==task_id:
+            return tasks.pop(index)       
+    raise HTTPException(status_code=404, detail='No task found')
+
 
 # Items Route
 @app.get("/items/{item_id}")
